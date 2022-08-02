@@ -4,7 +4,7 @@ const logger = require("koa-logger");
 const bodyParser = require("koa-bodyparser");
 const fs = require("fs");
 const path = require("path");
-const fetch = require('node-fetch')
+const request = require("request")
 // const { init: initDB, Counter } = require("./db");
 
 const router = new Router();
@@ -48,15 +48,18 @@ router.get("/", async (ctx) => {
 
 function sendmess (appid, mess) {
   return new Promise((resolve, reject) => {
-    fetch(`http://api.weixin.qq.com/cgi-bin/message/custom/send?from_appid=${appid}`, {
+    request({
       method: 'POST',
+      url: `http://api.weixin.qq.com/cgi-bin/message/custom/send?from_appid=${appid}`,
       body: JSON.stringify(mess)
-    }).then((response) => {
-      console.log('接口返回内容', response.body)
-      resolve(response.json())
-    }).catch(error => {
-      console.log('接口返回错误', error)
-       reject(error.toString())
+    }, function (error, response) {
+      if (error) {
+        console.log('接口返回错误', error)
+        reject(error.toString())
+      } else {
+        console.log('接口返回内容', response.body)
+        resolve(response.body)
+      }
     })
   })
 }
