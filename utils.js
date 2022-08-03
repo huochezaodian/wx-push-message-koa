@@ -125,21 +125,31 @@ async function sendTemp(token, openid)  {
 
 const oneDay = 24 * 60 * 60 * 1000
 
-function sendMsg() {
-  const token = getAccessToken()
-  if (!token) {
-    return
-  }
-  config.openids.forEach(openid => {
-    sendTemp(token, openid)
+async function sendMsg() {
+  const promises = []
+  return new Promise(function(res, rej) {
+    const token = getAccessToken()
+    if (!token) {
+      console.log('token 获取失败')
+      rej('token 获取失败')
+    }
+    config.openids.forEach(openid => {
+      promises.push(sendTemp(token, openid))
+    })
+    Promise.all(promises).catch(function(err){
+      console.log('接口返回错误', err)
+      rej(err.toString())
+    }).finally(function() {
+      res('执行完毕')
+    })
   })
 }
 
 const timer = null
 
-function sendMsgLoop() {
-  sendMsg()
-  setTimeout(sendMsg, 60 * 1000)
+async function sendMsgLoop() {
+  await sendMsg()
+  // setTimeout(sendMsg, 60 * 1000)
 }
 
 module.exports = {

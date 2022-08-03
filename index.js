@@ -33,7 +33,7 @@ router.get("/", async (ctx) => {
 
   console.log('req.body', req.body)
 
-  sendMsgLoop()
+  await sendMsgLoop()
 
   console.log('验证微信接口', str, sha)
 
