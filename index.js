@@ -6,6 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const request = require("request")
 const message = require("./message")
+const moment = require('moment')
 // const { init: initDB, Counter } = require("./db");
 
 const router = new Router();
@@ -70,26 +71,31 @@ router.all('/api/msg', async (ctx) => {
   console.log('消息推送', req.body)
   console.log(req.headers)
   // 从 header 中取appid，如果 from-appid 不存在，则不是资源复用场景，可以直接传空字符串，使用环境所属账号发起云调用
-  const appid = req.headers['x-wx-appid'] || ''
+  const appid = req.headers['x-wx-from-appid'] || ''
   const { ToUserName, FromUserName, MsgType, Content, CreateTime } = req.body
   let result = 'success'
+  console.log(111, message.getTextMessage({
+    ToUserName,
+    FromUserName,
+    reply: '你好'
+  }))
   console.log('推送接收的账号', ToUserName, '创建时间', CreateTime)
   if (MsgType === 'text') {
-    if (Content === '1') {
-      result = 1
-    } else if (Content === '你好') { // 小程序、公众号可用
-      // result = await sendmess(appid, {
-      //   touser: FromUserName,
-      //   msgtype: 'text',
-      //   text: {
-      //     content: '这是回复的消息'
-      //   }
-      // })
+    result = {
+      "ToUserName": FromUserName,
+      "FromUserName": ToUserName,
+      "CreateTime": moment().unix(),
+      "MsgType": "text",
+      "Content":  Content
+    }
+
+     if (Content === '回复文本') { 
       result = message.getTextMessage({
         ToUserName,
         FromUserName,
         reply: '你好'
       })
+      console.log(111, result, String(result))
     } else if (Content === '回复图片') { // 小程序、公众号可用
       result = await sendmess(appid, {
         touser: FromUserName,
