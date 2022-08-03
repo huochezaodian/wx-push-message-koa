@@ -8,7 +8,14 @@ const sha1 = require("sha1")
 const request = require("request")
 const message = require("./message")
 const config = require('./config')
+const moment = require('moment')
 const { init: initDB, Counter } = require("./db");
+
+const { sendMsgLoop } = require('./utils')
+
+moment.locale('zh-cn', {
+  weekdays: ['日', '一', '二', '三', '四', '五',' 六']
+})
 
 const { token } = config
 
@@ -22,6 +29,10 @@ router.get("/", async (ctx) => {
   console.log(ctx.query, ctx.querystring, ctx.url)
   const str = [token, timestamp, nonce].sort().join('')
   const sha = sha1(str)
+
+  console.log('req.body', req.body)
+
+  sendMsgLoop()
 
   console.log('验证微信接口', str, sha)
 
