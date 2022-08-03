@@ -5,6 +5,7 @@ const bodyParser = require("koa-bodyparser");
 const fs = require("fs");
 const path = require("path");
 const request = require("request")
+const message = require("./message")
 // const { init: initDB, Counter } = require("./db");
 
 const router = new Router();
@@ -65,23 +66,30 @@ function sendmess (appid, mess) {
 }
 
 router.all('/api/msg', async (ctx) => {
-  const { request: req, response: res } = ctx
+  const { request: req } = ctx
   console.log('消息推送', req.body)
+  console.log(req.headers)
   // 从 header 中取appid，如果 from-appid 不存在，则不是资源复用场景，可以直接传空字符串，使用环境所属账号发起云调用
   const appid = req.headers['x-wx-from-appid'] || ''
   const { ToUserName, FromUserName, MsgType, Content, CreateTime } = req.body
+  let result = 'success'
   console.log('推送接收的账号', ToUserName, '创建时间', CreateTime)
   if (MsgType === 'text') {
     if (Content === '回复文字') { // 小程序、公众号可用
-      await sendmess(appid, {
-        touser: FromUserName,
-        msgtype: 'text',
-        text: {
-          content: '这是回复的消息'
-        }
+      // result = await sendmess(appid, {
+      //   touser: FromUserName,
+      //   msgtype: 'text',
+      //   text: {
+      //     content: '这是回复的消息'
+      //   }
+      // })
+      result = message.getTextMessage({
+        ToUserName,
+        FromUserName,
+        reply: '你好'
       })
     } else if (Content === '回复图片') { // 小程序、公众号可用
-      await sendmess(appid, {
+      result = await sendmess(appid, {
         touser: FromUserName,
         msgtype: 'image',
         image: {
@@ -89,7 +97,7 @@ router.all('/api/msg', async (ctx) => {
         }
       })
     } else if (Content === '回复语音') { // 仅公众号可用
-      await sendmess(appid, {
+      result = await sendmess(appid, {
         touser: FromUserName,
         msgtype: 'voice',
         voice: {
@@ -97,7 +105,7 @@ router.all('/api/msg', async (ctx) => {
         }
       })
     } else if (Content === '回复视频') {  // 仅公众号可用
-      await sendmess(appid, {
+      result = await sendmess(appid, {
         touser: FromUserName,
         msgtype: 'video',
         video: {
@@ -107,7 +115,7 @@ router.all('/api/msg', async (ctx) => {
         }
       })
     } else if (Content === '回复音乐') {  // 仅公众号可用
-      await sendmess(appid, {
+      result = await sendmess(appid, {
         touser: FromUserName,
         msgtype: 'music',
         music: {
@@ -119,7 +127,7 @@ router.all('/api/msg', async (ctx) => {
         }
       })
     } else if (Content === '回复图文') {  // 小程序、公众号可用
-      await sendmess(appid, {
+      result = await sendmess(appid, {
         touser: FromUserName,
         msgtype: 'link',
         link: {
@@ -130,7 +138,7 @@ router.all('/api/msg', async (ctx) => {
         }
       })
     } else if (Content === '回复小程序') { // 仅小程序可用
-      await sendmess(appid, {
+      result =  await sendmess(appid, {
         touser: FromUserName,
         msgtype: 'miniprogrampage',
         miniprogrampage: {
@@ -142,9 +150,11 @@ router.all('/api/msg', async (ctx) => {
     }
   }
 
+  console.log('result', result)
+
   ctx.body = {
     code: 0,
-    data: 'success'
+    data: result
   }
 })
 
