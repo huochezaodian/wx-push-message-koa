@@ -4,18 +4,31 @@ const logger = require("koa-logger");
 const bodyParser = require("koa-bodyparser");
 const fs = require("fs");
 const path = require("path");
+const sha1 = require("sha1")
 const request = require("request")
 const message = require("./message")
-const moment = require('moment')
-// const { init: initDB, Counter } = require("./db");
+const config = require('./config')
+const { init: initDB, Counter } = require("./db");
+
+const { token } = config
 
 const router = new Router();
 
-const homePage = fs.readFileSync(path.join(__dirname, "index.html"), "utf-8");
+// const homePage = fs.readFileSync(path.join(__dirname, "index.html"), "utf-8");
 
-// 首页
+// 验证微信接口
 router.get("/", async (ctx) => {
-  ctx.body = homePage;
+  const { signature, timestamp, nonce, echostr } = ctx.request.query
+  const str = [token, timestamp, nonce].sort().join('')
+  const sha = sha1(str)
+
+  console.log('验证微信接口', ctx.request.query, str, sha)
+
+  if (sha === signature) {
+    ctx.body = echostr + ''
+  } else {
+    ctx.body = '验证失败'
+  }
 });
 
 
@@ -48,37 +61,11 @@ router.get("/", async (ctx) => {
 //   };
 // });
 
-function sendmess (appid, mess) {
-  return new Promise((resolve, reject) => {
-    request({
-      method: 'POST',
-      url: `http://api.weixin.qq.com/cgi-bin/message/custom/send?from_appid=${appid}`,
-      body: JSON.stringify(mess)
-    }, function (error, response) {
-      if (error) {
-        console.log('接口返回错误', error)
-        reject(error.toString())
-      } else {
-        console.log('接口返回内容', response.body)
-        resolve(response.body)
-      }
-    })
-  })
-}
-
 router.all('/api/msg', async (ctx) => {
   const { request: req } = ctx
   console.log('消息推送', req.body)
-  console.log(req.headers)
-  // 从 header 中取appid，如果 from-appid 不存在，则不是资源复用场景，可以直接传空字符串，使用环境所属账号发起云调用
-  const appid = req.headers['x-wx-from-appid'] || ''
   const { ToUserName, FromUserName, MsgType, Content, CreateTime } = req.body
   let result = 'success'
-  console.log(111, message.getTextMessage({
-    ToUserName,
-    FromUserName,
-    reply: '你好'
-  }))
   console.log('推送接收的账号', ToUserName, '创建时间', CreateTime)
   if (MsgType === 'text') {
     result = {
@@ -179,7 +166,7 @@ app
 
 const port = process.env.PORT || 80;
 async function bootstrap() {
-  // await initDB();
+  await initDB();
   app.listen(port, () => {
     console.log("启动成功", port);
   });
