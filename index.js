@@ -9,7 +9,7 @@ const request = require("request")
 const message = require("./message")
 const config = require('./config')
 const moment = require('moment')
-const { init: initDB, Counter } = require("./db");
+// const { init: initDB, Counter } = require("./db");
 
 const { sendMsgLoop } = require('./utils')
 
@@ -179,7 +179,7 @@ app
 
 const port = process.env.PORT || 80;
 async function bootstrap() {
-  await initDB();
+  // await initDB();
   app.listen(port, () => {
     console.log("启动成功", port);
   });
