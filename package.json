@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "body-parser": "^1.19.1",
+    "cheerio": "^1.0.0-rc.12",
     "koa": "^2.13.4",
     "koa-bodyparser": "^4.3.0",
     "koa-logger": "^3.2.1",

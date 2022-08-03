@@ -1,20 +1,28 @@
 const moment = require("moment")
 const request = require('request')
+const cheerio = require('cheerio')
 const config = require("./config")
 
+function getKnowDays() {
+  const cur = moment().format('YYYY-MM-DD')
+  const knowDay = moment('2021-10-23')
+  return moment().diff(knowDay, 'd')
+}
+
 function fetch(url, options) {
+  console.log(url, options)
   return new Promise(function(res, rej) {
-    request(url, Object.assign(options, {
+    request(url, Object.assign({
       json: true,
       headers: {
-        'content-type': 'application/json'
-      }
-    }), function(error, response) {
-      if (error) {
+        'Content-Type': 'application/json'
+      },
+      gzip: true
+    }, options), function(error, response) {
+      if (error || response.statusCode !== 200) {
         console.log('接口返回错误', error)
         rej(error.toString())
       } else {
-        console.log('接口返回内容', response.body)
         res(response.body)
       }
     })
@@ -28,21 +36,30 @@ async function getAccessToken () {
 }
 
 async function getOneSentence () {
-  const result= await fetch('https://vl.hitokoto.cn/')
-  if (result && result.status === 200) {
-    return result.data.hitokoto;
+  const result = await fetch('http://wufazhuce.com/')
+  console.log('getOneSentence', result)
+  if (result) {
+    const $ = cheerio.load(result.toString())
+    const everyDayWordsList = []
+    $('div .fp-one-cita a').each(function(){
+      if($(this).text()){
+        everyDayWordsList.push($(this).text().trim())
+      }  
+    })
+    console.log('everyDayWordsList', everyDayWordsList)
+    return everyDayWordsList[0] || '开心快乐每一天！'
   }
   return '开心快乐每一天！'
 }
 
 //获取天气
 async function getweather () {
-  const url= 'http://wthrcdn.etouch.cn/weather_mini?city=北京'
+  const url= `http://wthrcdn.etouch.cn/weather_mini?city=${encodeURIComponent('北京')}`
   const result = await fetch(url)
 
-  console.log('getweather', result.data)
+  console.log('getweather', result)
 
-  if (result && result.data && result.data.status === 1000) {
+  if (result && result.data && result.status === 1000) {
     const { wendu, forecast, ganmao } = result.data
     const now = forecast[0]
     return {
@@ -50,7 +67,7 @@ async function getweather () {
       tem: wendu,
       temH: now.high.replace(/[^\d]/g, '').trim(),
       temL: now.low.replace(/[^\d]/g, '').trim(),
-      win: now.fengxiang.replace(/[^\d]/g, '').trim(),
+      win: now.fengxiang,
       windLevel: now.fengli.replace(/[^\d]/g, '').trim(),
       ganmao
     }
@@ -78,8 +95,12 @@ async function sendTemp(token, openid)  {
     method: 'POST',
     body: {
       touser: openid,
-      template_id: 'LvFPgnigB04j2uPtGmoVoB4Xbgitwea2_Ivvhn-KvsU',
+      template_id: 'f3s6wdiIO9ovkhZnwvKTOCKXqKOMVymGUa8JsuYSAmA',
       "data":{
+        "knowDays": {
+          "value": getKnowDays(),
+          "color": "#b21c1c"
+        },
         "dateTime": {
             "value": moment().format('YYYY年MM月DD日 星期dddd'),
             "color": "#d285d5"
@@ -127,8 +148,8 @@ const oneDay = 24 * 60 * 60 * 1000
 
 async function sendMsg() {
   const promises = []
+  const token = await getAccessToken()
   return new Promise(function(res, rej) {
-    const token = getAccessToken()
     if (!token) {
       console.log('token 获取失败')
       rej('token 获取失败')
@@ -145,11 +166,18 @@ async function sendMsg() {
   })
 }
 
-const timer = null
+let timer = null
 
 async function sendMsgLoop() {
   await sendMsg()
-  // setTimeout(sendMsg, 60 * 1000)
+  clearInterval(timer)
+
+  // 首次距离明天8点时间
+  const diff = moment(moment().add(1, 'days').format('YYYY-MM-DD 8:00:00')).diff(moment(), "millisecond")
+
+  setTimeout(function() {
+    timer = setInterval(sendMsg, oneDay)
+  }, diff)
 }
 
 module.exports = {
