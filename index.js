@@ -70,12 +70,14 @@ router.all('/api/msg', async (ctx) => {
   console.log('消息推送', req.body)
   console.log(req.headers)
   // 从 header 中取appid，如果 from-appid 不存在，则不是资源复用场景，可以直接传空字符串，使用环境所属账号发起云调用
-  const appid = req.headers['x-wx-from-appid'] || ''
+  const appid = req.headers['x-wx-appid'] || ''
   const { ToUserName, FromUserName, MsgType, Content, CreateTime } = req.body
   let result = 'success'
   console.log('推送接收的账号', ToUserName, '创建时间', CreateTime)
   if (MsgType === 'text') {
-    if (Content === '回复文字') { // 小程序、公众号可用
+    if (Content === '1') {
+      result = 1
+    } else if (Content === '你好') { // 小程序、公众号可用
       // result = await sendmess(appid, {
       //   touser: FromUserName,
       //   msgtype: 'text',
@@ -152,10 +154,7 @@ router.all('/api/msg', async (ctx) => {
 
   console.log('result', result)
 
-  ctx.body = {
-    code: 0,
-    data: result
-  }
+  ctx.body = result
 })
 
 // 小程序调用，获取微信 Open ID
