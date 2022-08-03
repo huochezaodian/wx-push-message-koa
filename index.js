@@ -18,11 +18,12 @@ const router = new Router();
 
 // 验证微信接口
 router.get("/", async (ctx) => {
-  const { signature, timestamp, nonce, echostr } = ctx.request.query
+  const { signature, timestamp, nonce, echostr } = ctx.query
+  console.log(ctx.query, ctx.querystring, ctx.url)
   const str = [token, timestamp, nonce].sort().join('')
   const sha = sha1(str)
 
-  console.log('验证微信接口', ctx.request.query, str, sha)
+  console.log('验证微信接口', str, sha)
 
   if (sha === signature) {
     ctx.body = echostr + ''
