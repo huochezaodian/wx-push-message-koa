@@ -28,5 +28,5 @@ async function init() {
 // 导出初始化方法和模型
 module.exports = {
   init,
-  Users,
+  Counter,
 };
