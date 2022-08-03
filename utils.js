@@ -74,7 +74,7 @@ async function sendTemp(token, openid)  {
 
   const msg = await getOneSentence()
 
-  return fetch(`https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=${token}`, {
+  const result = await fetch(`https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=${token}`, {
     method: 'POST',
     body: {
       touser: openid,
@@ -119,6 +119,8 @@ async function sendTemp(token, openid)  {
       }
     }
   })
+
+  console.log('sendTemp', result)
 }
 
 const oneDay = 24 * 60 * 60 * 1000

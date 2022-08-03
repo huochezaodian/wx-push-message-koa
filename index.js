@@ -25,7 +25,8 @@ const router = new Router();
 
 // 验证微信接口
 router.get("/", async (ctx) => {
-  const { signature, timestamp, nonce, echostr } = ctx.query
+  const { query, request: req } = ctx
+  const { signature, timestamp, nonce, echostr } = query
   console.log(ctx.query, ctx.querystring, ctx.url)
   const str = [token, timestamp, nonce].sort().join('')
   const sha = sha1(str)
