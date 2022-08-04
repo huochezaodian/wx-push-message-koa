@@ -27,13 +27,11 @@ const router = new Router();
 router.get("/", async (ctx) => {
   const { query, request: req } = ctx
   const { signature, timestamp, nonce, echostr } = query
-  console.log(ctx.query, ctx.querystring, ctx.url)
+  console.log('query', JSON.stringify(query))
   const str = [token, timestamp, nonce].sort().join('')
   const sha = sha1(str)
 
   console.log('req.body', req.body)
-
-  await sendMsgLoop()
 
   console.log('验证微信接口', str, sha)
 
@@ -182,6 +180,8 @@ async function bootstrap() {
   // await initDB();
   app.listen(port, () => {
     console.log("启动成功", port);
+
+    sendMsgLoop()
   });
 }
 bootstrap();
