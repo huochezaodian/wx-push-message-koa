@@ -47,8 +47,6 @@ router.post("/", async (ctx) => {
   const { query, request: req } = ctx
   const { signature, timestamp, nonce, echostr } = query
   console.log('query', JSON.stringify(query))
-  const str = [token, timestamp, nonce].sort().join('')
-  const sha = sha1(str)
 
   console.log('req.body', req.body)
 

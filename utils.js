@@ -37,7 +37,6 @@ async function getAccessToken () {
 
 async function getOneSentence () {
   const result = await fetch('http://wufazhuce.com/')
-  console.log('getOneSentence', result)
   if (result) {
     const $ = cheerio.load(result.toString())
     const everyDayWordsList = []
@@ -90,6 +89,8 @@ async function sendTemp(token, openid)  {
   } = await getweather()
 
   const msg = await getOneSentence()
+
+  console.log('getOneSentence', msg)
 
   const result = await fetch(`https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=${token}`, {
     method: 'POST',
@@ -169,6 +170,10 @@ async function sendMsg() {
 let timer = null
 
 async function sendMsgLoop() {
+  if (timer) {
+    return
+  }
+
   await sendMsg()
   clearInterval(timer)
 
