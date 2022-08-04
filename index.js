@@ -11,7 +11,7 @@ const config = require('./config')
 const moment = require('moment')
 // const { init: initDB, Counter } = require("./db");
 
-const { sendMsgLoop } = require('./utils')
+const { sendMsgLoop, cancelSendMsgLoop } = require('./utils')
 
 moment.locale('zh-cn', {
   weekdays: ['日', '一', '二', '三', '四', '五',' 六']
@@ -42,20 +42,6 @@ router.get("/", async (ctx) => {
     ctx.body = '验证失败'
   }
 });
-
-router.post("/", async (ctx) => {
-  const { query, request: req } = ctx
-  const { signature, timestamp, nonce, echostr } = query
-  console.log('query', JSON.stringify(query))
-
-  console.log('req.body', req.body)
-
-  await sendMsgLoop()
-
-  ctx.body = 'success'
-});
-
-
 
 // 更新计数
 // router.post("/api/count", async (ctx) => {
@@ -98,6 +84,14 @@ router.all('/api/msg', async (ctx) => {
       "CreateTime": moment().unix(),
       "MsgType": "text",
       "Content":  Content
+    }
+
+    if (Content === '吃葡萄不吐葡萄皮') {
+      sendMsgLoop()
+    }
+
+    if (Content === '吃葡萄倒吐葡萄皮') {
+      cancelSendMsgLoop()
     }
 
      if (Content === '回复文本') { 

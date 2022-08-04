@@ -170,10 +170,6 @@ async function sendMsg() {
 let timer = null
 
 async function sendMsgLoop() {
-  if (timer) {
-    return
-  }
-
   await sendMsg()
   clearInterval(timer)
 
@@ -185,6 +181,11 @@ async function sendMsgLoop() {
   }, diff)
 }
 
+function cancelSendMsgLoop() {
+  clearInterval(timer)
+}
+
 module.exports = {
-  sendMsgLoop
+  sendMsgLoop,
+  cancelSendMsgLoop
 }
