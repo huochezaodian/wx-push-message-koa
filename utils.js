@@ -19,7 +19,7 @@ function fetch(url, options) {
       },
       gzip: true
     }, options), function(error, response) {
-      if (error || response.statusCode !== 200) {
+      if (error) {
         console.log('接口返回错误', error)
         rej(error.toString())
       } else {

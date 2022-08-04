@@ -33,8 +33,6 @@ router.get("/", async (ctx) => {
 
   console.log('req.body', req.body)
 
-  sendMsgLoop()
-
   console.log('验证微信接口', str, sha)
   
 
@@ -43,6 +41,20 @@ router.get("/", async (ctx) => {
   } else {
     ctx.body = '验证失败'
   }
+});
+
+router.post("/", async (ctx) => {
+  const { query, request: req } = ctx
+  const { signature, timestamp, nonce, echostr } = query
+  console.log('query', JSON.stringify(query))
+  const str = [token, timestamp, nonce].sort().join('')
+  const sha = sha1(str)
+
+  console.log('req.body', req.body)
+
+  await sendMsgLoop()
+
+  ctx.body = 'success'
 });
 
 
