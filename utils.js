@@ -36,17 +36,9 @@ async function getAccessToken () {
 }
 
 async function getOneSentence () {
-  const result = await fetch('http://wufazhuce.com/')
-  if (result) {
-    const $ = cheerio.load(result.toString())
-    const everyDayWordsList = []
-    $('div .fp-one-cita a').each(function(){
-      if($(this).text()){
-        everyDayWordsList.push($(this).text().trim())
-      }  
-    })
-    console.log('everyDayWordsList', everyDayWordsList)
-    return everyDayWordsList[0] || '开心快乐每一天！'
+  const result = await fetch('http://api.vvhan.com/api/love?type=json')
+  if (result.success) {
+    return result.ishan
   }
   return '开心快乐每一天！'
 }
@@ -58,7 +50,7 @@ async function getweather () {
 
   console.log('getweather', result)
 
-  if (result && result.data && result.length) {
+  if (result && result.data && result.data.length) {
     const { wea, tem, tem1, tem2, narrative, win_speed, win } = result.data[0]
     return {
       wea,
