@@ -53,22 +53,21 @@ async function getOneSentence () {
 
 //获取天气
 async function getweather () {
-  const url= `http://wthrcdn.etouch.cn/weather_mini?city=${encodeURIComponent('北京')}`
+  const url= `http://v0.yiketianqi.com/api?unescape=1&version=v91&appid=43656176&appsecret=I42og6Lm&ext=&cityid=&city=${encodeURIComponent('北京')}`
   const result = await fetch(url)
 
   console.log('getweather', result)
 
-  if (result && result.data && result.status === 1000) {
-    const { wendu, forecast, ganmao } = result.data
-    const now = forecast[0]
+  if (result && result.data && result.length) {
+    const { wea, tem, tem1, tem2, narrative, win_speed, win } = result.data[0]
     return {
-      wea: now.type,
-      tem: wendu,
-      temH: now.high.replace(/[^\d]/g, '').trim(),
-      temL: now.low.replace(/[^\d]/g, '').trim(),
-      win: now.fengxiang,
-      windLevel: now.fengli.replace(/[^\d]/g, '').trim(),
-      ganmao
+      wea,
+      tem,
+      temH: tem1,
+      temL: tem2,
+      win: Array.isArray(win) ? win.join('、') : win,
+      windLevel: win_speed,
+      ganmao: narrative,
     }
   }
 
@@ -87,6 +86,8 @@ async function sendTemp(token, openid)  {
   const {
     wea, tem, temH, temL, win, windLevel, ganmao
   } = await getweather()
+
+  console.log('weather"', wea, )
 
   const msg = await getOneSentence()
 
