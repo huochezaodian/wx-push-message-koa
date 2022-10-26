@@ -90,7 +90,7 @@ async function sendTemp(token, openid)  {
     method: 'POST',
     body: {
       touser: openid,
-      template_id: 'RUR0qVvEbi-L_NvNBOpykopU4DbRN8TFXEuedxcGS40',
+      template_id: 'JxQnVinI7fJMPcAJktVBzPXPJqsqtAdUcHEEOy-8QIU',
       "data":{
         "knowDays": {
           "value": getKnowDays(),
