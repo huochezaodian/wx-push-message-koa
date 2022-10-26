@@ -160,8 +160,9 @@ async function sendMsg() {
 }
 
 let timer = null
+let maxCount = 1
 let sendCount = 0
-let targetH = 12
+let targetH = 8
 
 async function sendMsgLoop() {
   await sendMsg()
@@ -170,11 +171,13 @@ async function sendMsgLoop() {
   timer = setInterval(function() {
     console.log('当前时间:', moment().format('YYYY-MM-DD HH:mm:ss'))
     const curH = moment().hours()
-    if (sendCount < 10 && curH === targetH) {
+    console.log(222, curH, moment().hour())
+    if (sendCount < maxCount && curH === targetH) {
       sendCount++
       sendMsg()
     }
-    if (sendCount >= 10 || curH !== targetH) {
+    // 目标时间外重置
+    if (curH !== targetH) {
       sendCount = 0
     }
   }, 5 * 60 * 1000)
