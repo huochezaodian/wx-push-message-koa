@@ -161,7 +161,7 @@ async function sendMsg() {
 
 let timer = null
 let sendCount = 0
-let targetH = 11
+let targetH = 12
 
 async function sendMsgLoop() {
   await sendMsg()
