@@ -1,12 +1,13 @@
 const moment = require("moment")
 const request = require('request')
-const cheerio = require('cheerio')
 const config = require("./config")
 
 function getKnowDays() {
-  const cur = moment().format('YYYY-MM-DD')
   const knowDay = moment('2021-10-23')
-  return moment().diff(knowDay, 'd')
+  const duration = moment.duration(moment().diff(knowDay))
+  const {_data} = duration
+  const {years, months, days,hours, minutes, seconds} = _data
+  return `${years}年${months ? ` ${months}个月` : ''}${days ? ` ${days}天` : ''}${hours ? ` ${hours}小时` : ''}${minutes? ` ${minutes}分`: ''}${seconds ? ` ${seconds}秒` : ''}`
 }
 
 function fetch(url, options) {
@@ -89,7 +90,7 @@ async function sendTemp(token, openid)  {
     method: 'POST',
     body: {
       touser: openid,
-      template_id: 'YvNnyS8dTZVBs2tR0SYRtb1kJOjOO0EQvOV9_3xZ42k',
+      template_id: 'RUR0qVvEbi-L_NvNBOpykopU4DbRN8TFXEuedxcGS40',
       "data":{
         "knowDays": {
           "value": getKnowDays(),
@@ -166,12 +167,10 @@ async function sendMsgLoop() {
   await sendMsg()
   clearInterval(timer)
 
-  // 首次距离明天8点时间
-  const diff = moment(moment().add(1, 'days').format('YYYY-MM-DD 8:00:00')).diff(moment(), "millisecond")
-
   setTimeout(function() {
+    console.log('当前时间:', moment().format('YYYY-MM-DD HH:mm:ss'))
     timer = setInterval(sendMsg, oneDay)
-  }, diff)
+  }, 5 * 60 * 1000)
 }
 
 function cancelSendMsgLoop() {
