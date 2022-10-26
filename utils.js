@@ -139,8 +139,6 @@ async function sendTemp(token, openid)  {
   console.log('sendTemp', result)
 }
 
-const oneDay = 24 * 60 * 60 * 1000
-
 async function sendMsg() {
   const promises = []
   const token = await getAccessToken()
@@ -162,14 +160,23 @@ async function sendMsg() {
 }
 
 let timer = null
+let sendCount = 0
+let targetH = 11
 
 async function sendMsgLoop() {
   await sendMsg()
   clearInterval(timer)
 
-  setTimeout(function() {
+  timer = setInterval(function() {
     console.log('当前时间:', moment().format('YYYY-MM-DD HH:mm:ss'))
-    timer = setInterval(sendMsg, oneDay)
+    const curH = moment().hours()
+    if (sendCount < 10 && curH === targetH) {
+      sendCount++
+      sendMsg()
+    }
+    if (sendCount >= 10 || curH !== targetH) {
+      sendCount = 0
+    }
   }, 5 * 60 * 1000)
 }
 
